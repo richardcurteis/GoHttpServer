@@ -14,9 +14,9 @@ func main() {
 
 	// User arguments
 	lport := flag.Int("-port", 8000, "Local port to listen for connections")
-	cert := flag.String("-cert", false, "Certificate for TLS connection")
+	cert := flag.String("-cert", "", "Certificate for TLS connection")
 	
-	if *cert == false {
+	if *cert == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
