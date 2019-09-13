@@ -23,12 +23,12 @@ func main() {
 	
 	// User arguments
 	listenPort := flag.Int("-port", 8000, "Local port to listen for connections")
-	tlsCert := flag.String("-cert", "", "Certificate for TLS connection")
+	tlsCert := flag.String("-cert", "", "Certificate file for TLS connection")
 	preserveTls := flag.Bool("-no-tls", false, "Disable TLS comms. Example: -no-tls")
 	flag.Parse()
 	
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name == "-no-tls" &&  {
+		if f.Name == "-no-tls" {
 			*tlsEnabled = preserveTls
 		}
 	})
