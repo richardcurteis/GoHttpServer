@@ -4,10 +4,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"flag"
+	"os"
 )
 
 func main() {
@@ -15,19 +17,19 @@ func main() {
 	// User arguments
 	lport := flag.Int("-port", 8000, "Local port to listen for connections")
 	cert := flag.String("-cert", "", "Certificate for TLS connection")
-	
+
 	if *cert == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write([]byte("It works !!\n"))
 	})
 
-	b, _ := ioutil.ReadFile(cert)
+	b, _ := ioutil.ReadFile(*cert)
 	var pemBlocks []*pem.Block
 	var v *pem.Block
 	var pkey []byte
