@@ -13,24 +13,34 @@ import (
 )
 
 func main() {
-
-	// User arguments
-	var tlsEnabled = true
-	var lport = flag.Int("-port", 8000, "Local port to listen for connections")
-	var cert = flag.String("-cert", "", "Certificate for TLS connection")
-	var disableTls = flag.Bool("-no-tls", true, "Disable TLS")
-
-	if *cert == "" {
+	// TLS on by default
+	tlsEnabled := true
+	
+	if len(os.Args) == 0 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+	
+	// User arguments
+	listenPort := flag.Int("-port", 8000, "Local port to listen for connections")
+	tlsCert := flag.String("-cert", "", "Certificate for TLS connection")
+	preserveTls := flag.Bool("-no-tls", false, "Disable TLS comms. Example: -no-tls")
+	flag.Parse()
+	
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "-no-tls" &&  {
+			*tlsEnabled = preserveTls
+		}
+	})
 
 	// Choose between secure or unsecure channel
-	if *disableTls == true {
+	if *tlsEnabled == true && *tlsCert != "" {
 		// Unsecured function
 	} else {
 		// Secured function
 	}
+	
+	if *tlsCert
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
@@ -38,7 +48,7 @@ func main() {
 		w.Write([]byte("It works !!\n"))
 	})
 
-	b, _ := ioutil.ReadFile(*cert)
+	b, _ := ioutil.ReadFile(*tlsCert)
 	var pemBlocks []*pem.Block
 	var v *pem.Block
 	var pkey []byte
@@ -77,7 +87,7 @@ func main() {
 		Certificates: []tls.Certificate{c},
 	}
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", *lport),
+		Addr:         fmt.Sprintf(":%d", *listenPort),
 		Handler:      mux,
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
