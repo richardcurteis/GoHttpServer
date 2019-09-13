@@ -15,12 +15,21 @@ import (
 func main() {
 
 	// User arguments
-	lport := flag.Int("-port", 8000, "Local port to listen for connections")
-	cert := flag.String("-cert", "", "Certificate for TLS connection")
+	var tlsEnabled = true
+	var lport = flag.Int("-port", 8000, "Local port to listen for connections")
+	var cert = flag.String("-cert", "", "Certificate for TLS connection")
+	var disableTls = flag.Bool("-no-tls", true, "Disable TLS")
 
 	if *cert == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
+	}
+
+	// Choose between secure or unsecure channel
+	if *disableTls == true {
+		// Unsecured function
+	} else {
+		// Secured function
 	}
 
 	mux := http.NewServeMux()
@@ -68,7 +77,7 @@ func main() {
 		Certificates: []tls.Certificate{c},
 	}
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", lport),
+		Addr:         fmt.Sprintf(":%d", *lport),
 		Handler:      mux,
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
