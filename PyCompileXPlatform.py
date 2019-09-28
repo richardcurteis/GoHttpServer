@@ -8,7 +8,8 @@ def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-o', '--os', type=str, help="Target OS")
 	parser.add_argument('-a', '--arch', type=str, help="Compilation Architecture")
-	parser.add_argument('-i', '--input', type=str, help="Input File")
+	parser.add_argument('-i', '--infile', type=str, help="infile File")
+	parser.add_argument('-o', '--output', type=str, help="Output File")
 	parser.add_argument('-p', '--print', action='store_true', help="Print OS and Architecture Compatibility")
 	return parser.parse_args()
 
@@ -29,7 +30,7 @@ def os_and_archs():
 		"windows": ["386/x86", "amd64"]
 	}
 
-def print_table():
+def print_archs_table():
 	pt = PrettyTable()
 	pt.field_names = ["#", "OS", "Supported Architectures"]
 
@@ -44,19 +45,52 @@ def print_table():
 	pt.align["Supported Architectures"] = "l"
 	print(pt)
 
+def print_build():
+	pt = PrettyTable()
+	pt.field_names = ["Variable", "Detail"]
+	pt.add_row(["OS", args.os])
+	pt.add_row(["Architecture", args.arch])
+	pt.add_row(["Infile", args.infile])
+	pt.add_row(["Outfile", args.outfile])
+	pt.align["Detail"] = "l"
+	print(pt)
+
 def compile(args):
 	os = args.os
 	if os is "386/x86":
 		os = '386'
+	
+	# Back up current GO environment variables
+	GOARCH, GOOS = os.getenv('GOARCH'), os.getenv('GOOS')
 
-	os.system('export' + f'GOARCH={args.arch}')
-	os.system('export' + f'GOOS={os}')
+	# Print Build details
+	print_build()
 
 	try:
-		os.system('go' + 'build' + '-ldflags="-s -w"')
-		os.system('upx' + 'brute' + f'{args.input}')
+		os.environ['GOARCH'] = args.arch
+		os.environ['GOOS'] = os
+
+		# Build Go binary without debug info '-s' and dwarf information, '-w'. Reduce file size.
+		# Create outfile with infile file minus '.go' extension
+		print("[*] Build binary...")
+		os.system(f'go build -ldflags="-s -w" -o {args.outfile} {args.infile}')
+
+		# Use UPX to pack binary
+		print("[*] UPX pack binary...")
+		os.system(f'upx brute {args.infile[::-3]}')
 	except Exception as e:
 		print(e)
+	finally:
+		# Restore environment variables
+		if type(GOARCH) is None:
+			 	os.environ.pop('GOARCH')
+		else:
+			os.environ['GOARCH'] = GOARCH
+
+		if type(GOOS) is None:
+			 	os.environ.pop('GOOS')
+		else:
+			os.environ['GOOS'] = GOARCH
 		
 def exit(msg):
 	print(msg)
@@ -66,25 +100,35 @@ if __name__ == '__main__':
 	args = get_args()
 
 	if args.print:
-		print_table()
+		print_archs_table()
 
-	if args.os and args.arch and args.input:
+	if os.path.exists(args.infile):
+		print('[*] File exists')
+	else:
+		print("[!] Not found. Checking for 'main.go in current directory...")
+		if os.path.exists('main.go'):
+			print(["[*] main.go found in current directory. We'll build with this..."])
+			args.infile = 'main.go'
+		else:
+			exit('[*] No suitable *.go files found. Check path.')
+
+	if args.os and args.arch and args.infile:
 		args.os = args.os.lower().strip()
 		args.arch = args.arch.lower().strip()
-		args.input = args.input.strip()
+		args.infile = args.infile.strip()
+		if args.output is False:
+			args.output = args.infile[0:-3]
+			print(f"[!] No outfile specified with '-o' flag. Automatically generated: {args.output}")
+		else:
+			args.output = args.output.strip()
 	else:
 		exit("[!] Missing arguments. Run with -h to view help.")
 	
 	if args.arch is 'x86' or '386' or '86':
 		args.arch = "386/x86"
-	
-	if os.path.exists(args.input):
-		print('[*] File exists')
-	else:
-		exit('[*] File not found. Check path.')
 
 	if args.os in os_and_archs().keys() and args.arch in os_and_archs()[args.os]:
 		compile(args)
 	else:
-		print_table()
+		print_archs_table()
 		exit(f"[!] Invalid OS: {args.os}. Run script with -p flag to view compatibility table.")
