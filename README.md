@@ -7,3 +7,7 @@
 3. Project to create slightly more compl,ex server utilising TLS encryption. WIP.
 
 4. goCat - Netcat copy but in Go. basic server to listen on a port and execute commands
+
+Fix:
+
+1. Compilation Helper not creating 64 bit for windows. All coming out as 32 bit
