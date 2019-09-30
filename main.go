@@ -2,7 +2,7 @@ package main
 
 import (
 	"./src/bindShell"
-	//"./src/fileServer"
+	"./src/fileServer"
 )
 
 func main() {
@@ -10,6 +10,6 @@ func main() {
 	//directory := flag.String("d", ".", "the directory of static file to host")
 	//flag.Parse()
 	bindShell.Run()
-	//fileServer.Run("443", ".")
+	fileServer.Run("443", ".")
 
 }

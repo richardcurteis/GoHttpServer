@@ -1,6 +1,7 @@
 package bindShell
 
 import (
+	"../configs"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -60,16 +61,7 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config := &tls.Config{MinVersion:               tls.VersionTLS12,
-		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-		}, Certificates: []tls.Certificate{cer},
-	}
+	config := configs.GetTlsConfigWithCer(cer)
 
 	tln, err := tls.Listen("tcp", ":" + *port, config)
 	if err != nil {
