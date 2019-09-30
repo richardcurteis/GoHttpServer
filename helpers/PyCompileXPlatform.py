@@ -64,14 +64,14 @@ def compile(args):
     op_sys = args.os
 
     # Back up current GO environment variables
-    GOARCH, GOOS = os.getenv('GOARCH'), os.getenv('GOOS')
+    GOARCH, GOOS = os.getenv("GOARCH"), os.getenv("GOOS")
 
     # Print Build details
     print_build()
 
     try:
-        os.environ['GOARCH'] = args.arch
-        os.environ['GOOS'] = op_sys
+        os.environ["GOARCH"] = args.arch
+        os.environ["GOOS"] = op_sys
 
         # Build Go binary without debug info '-s' and dwarf information, '-w'. Reduce file size.
         # Create outfile with infile file minus '.go' extension
@@ -79,21 +79,21 @@ def compile(args):
         os.system(f'go build -ldflags="-s -w" -o {args.write} {args.infile}')
 
         # Use UPX to pack binary
-        print("[*] UPX pack binary...")
-        os.system(f'upx brute {args.infile[::-3]}')
+        print("[*] UPX pack binary with '--brute'...")
+        os.system(f'upx --brute {args.write}')
     except Exception as e:
         print(e)
     finally:
         # Restore environment variables
         if type(GOARCH) is None:
             os.environ.pop('GOARCH')
-        else:
-            os.environ['GOARCH'] = GOARCH
+        # else:
+        #     os.environ['GOARCH'] = GOARCH
 
         if type(GOOS) is None:
             os.environ.pop('GOOS')
-        else:
-            os.environ['GOOS'] = GOARCH
+        # else:
+        #     os.environ['GOOS'] = GOARCH
 
 
 def exit(msg):
