@@ -76,24 +76,13 @@ def compile(args):
         # Build Go binary without debug info '-s' and dwarf information, '-w'. Reduce file size.
         # Create outfile with infile file minus '.go' extension
         print("[*] Build binary...")
-        os.system(f'go build -ldflags="-s -w" -o {args.write} {args.infile}')
+        os.system(f'GOOS={args.os} GOARCH={args.arch} go build -ldflags="-s -w" -o {args.write} {args.infile}')
 
         # Use UPX to pack binary
         print("[*] UPX pack binary with '--brute'...")
         os.system(f'upx --brute {args.write}')
     except Exception as e:
         print(e)
-    finally:
-        # Restore environment variables
-        if type(GOARCH) is None:
-            os.environ.pop('GOARCH')
-        # else:
-        #     os.environ['GOARCH'] = GOARCH
-
-        if type(GOOS) is None:
-            os.environ.pop('GOOS')
-        # else:
-        #     os.environ['GOOS'] = GOARCH
 
 
 def exit(msg):
