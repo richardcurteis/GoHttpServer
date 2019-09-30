@@ -4,9 +4,9 @@ import "crypto/tls"
 
 func GetTlsConfigWithCer(cer tls.Certificate) *tls.Config {
 	return &tls.Config{
-		MinVersion: tls.VersionTLS12,
+		MinVersion: tlsVersion(),
 		CurvePreferences:  curvePreferences(),
-		PreferServerCipherSuites: true,
+		PreferServerCipherSuites: cipherSuitesPreference(),
 		CipherSuites: cipherSuites(),
 		Certificates: []tls.Certificate{cer},
 	}
@@ -14,11 +14,19 @@ func GetTlsConfigWithCer(cer tls.Certificate) *tls.Config {
 
 func GetTlsConfigNoCer() *tls.Config {
 	return &tls.Config{
-		MinVersion:	tls.VersionTLS12,
+		MinVersion:	tlsVersion(),
 		CurvePreferences: curvePreferences(),
-		PreferServerCipherSuites: 	true,
+		PreferServerCipherSuites: 	cipherSuitesPreference(),
 		CipherSuites: cipherSuites(),
 	}
+}
+
+func cipherSuitesPreference() bool {
+	return true
+}
+
+func tlsVersion() uint16{
+	return tls.VersionTLS12
 }
 
 func cipherSuites() []uint16 {
