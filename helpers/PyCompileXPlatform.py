@@ -61,18 +61,11 @@ def print_build():
 
 
 def compile(args):
-    op_sys = args.os
-
-    # Back up current GO environment variables
-    GOARCH, GOOS = os.getenv("GOARCH"), os.getenv("GOOS")
-
+    
     # Print Build details
     print_build()
 
     try:
-        os.environ["GOARCH"] = args.arch
-        os.environ["GOOS"] = op_sys
-
         # Build Go binary without debug info '-s' and dwarf information, '-w'. Reduce file size.
         # Create outfile with infile file minus '.go' extension
         print("[*] Build binary...")
